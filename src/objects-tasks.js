@@ -17,8 +17,23 @@
  *    shallowCopy({a: 2, b: { a: [1, 2, 3]}}) => {a: 2, b: { a: [1, 2, 3]}}
  *    shallowCopy({}) => {}
  */
-function shallowCopy(/* obj */) {
-  throw new Error('Not implemented');
+function shallowCopy(obj) {
+  let ans;
+  if (Array.isArray(obj)) {
+    ans = [];
+    obj.forEach((el) => {
+      if (typeof el === 'object') ans.push(shallowCopy(el));
+      else ans.push(el);
+    });
+    return ans;
+  }
+  ans = {};
+  ans = Object.assign(ans, obj);
+  const keys = Object.keys(obj);
+  keys.forEach((key) => {
+    if (typeof obj[key] === 'object') ans[key] = shallowCopy(obj[key]);
+  });
+  return ans;
 }
 
 /**
