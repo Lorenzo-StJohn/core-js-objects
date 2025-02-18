@@ -385,34 +385,126 @@ function group(array, keySelector, valueSelector) {
  *
  *  For more examples see unit tests.
  */
+class A {
+  constructor(a, b, c, d, arr) {
+    this.str = a;
+    this.countEl = b;
+    this.countID = c;
+    this.countPE = d;
+    this.arr = arr;
+    if (arr[arr.length - 1] < arr[arr.length - 2]) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    if (b > 1 || c > 1 || d > 1) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
+  }
+
+  stringify() {
+    return this.str;
+  }
+
+  element(value) {
+    return new A(
+      this.str + value,
+      this.countEl + 1,
+      this.countID,
+      this.countPE,
+      [...this.arr, 0]
+    );
+  }
+
+  id(value) {
+    return new A(
+      `${this.str}#${value}`,
+      this.countEl,
+      this.countID + 1,
+      this.countPE,
+      [...this.arr, 1]
+    );
+  }
+
+  class(value) {
+    return new A(
+      `${this.str}.${value}`,
+      this.countEl,
+      this.countID,
+      this.countPE,
+      [...this.arr, 2]
+    );
+  }
+
+  attr(value) {
+    return new A(
+      `${this.str}[${value}]`,
+      this.countEl,
+      this.countID,
+      this.countPE,
+      [...this.arr, 3]
+    );
+  }
+
+  pseudoClass(value) {
+    return new A(
+      `${this.str}:${value}`,
+      this.countEl,
+      this.countID,
+      this.countPE,
+      [...this.arr, 4]
+    );
+  }
+
+  pseudoElement(value) {
+    return new A(
+      `${this.str}::${value}`,
+      this.countEl,
+      this.countID,
+      this.countPE + 1,
+      [...this.arr, 5]
+    );
+  }
+
+  combine(selector1, combinator, selector2) {
+    this.str = '';
+    return new A(
+      `${selector1.stringify()} ${combinator} ${selector2.stringify()}`,
+      selector2.countEl,
+      selector2.countID,
+      selector2.countPE,
+      selector2.arr
+    );
+  }
+}
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  str: new A('', 0, 0, 0, [-2, -1]),
+  element(value) {
+    return this.str.element(value);
   },
-
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    return this.str.id(value);
   },
-
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    return this.str.class(value);
   },
-
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    return this.str.attr(value);
   },
-
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    return this.str.pseudoClass(value);
   },
-
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    return this.str.pseudoElement(value);
   },
-
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    return this.str.combine(selector1, combinator, selector2);
+  },
+  stringify() {
+    return this.str.stringify();
   },
 };
 
